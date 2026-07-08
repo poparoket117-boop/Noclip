@@ -1,4 +1,4 @@
--- DrunixHub :: NoClip + Infinite Jump + God Mode (Red Theme)
+-- Drunix Hub (Red Theme) :: NoClip + InfJump + God Mode + WalkSpeed
 local player = game.Players.LocalPlayer
 local char = player.Character or player.CharacterAdded:Wait()
 local hum = char:FindFirstChild("Humanoid")
@@ -10,12 +10,12 @@ local god = false
 local walkSpeed = 16
 local menuOpen = false
 
--- GOD MODE (рабочий)
+-- GOD MODE (реальное бессмертие)
 local function SetGod(state)
     god = state
     if state then
-        hum.MaxHealth = math.huge
-        hum.Health = math.huge
+        hum.MaxHealth = 9e9
+        hum.Health = 9e9
         hum.BreakJointsOnDeath = false
     else
         hum.MaxHealth = 100
@@ -24,7 +24,7 @@ local function SetGod(state)
     end
 end
 
--- INFINITE JUMP (из FoxnameHub)
+-- INFINITE JUMP (как в FoxnameHub)
 local jumpCon
 local function SetInfJump(state)
     infJump = state
@@ -53,17 +53,22 @@ local function SetNoClip(state)
     end
 end
 
+-- Перезагрузка персонажа (сохраняем всё)
 player.CharacterAdded:Connect(function(newChar)
     char = newChar
-    hum = char:FindFirstChild("Humanoid")
-    root = char:FindFirstChild("HumanoidRootPart")
+    hum = char:WaitForChild("Humanoid")
+    root = char:WaitForChild("HumanoidRootPart")
+    
     if noclip then SetNoClip(true) end
-    if infJump then SetInfJump(true) startInfJump() end
+    if infJump then 
+        SetInfJump(true) 
+        startInfJump() 
+    end
     if god then SetGod(true) end
     hum.WalkSpeed = walkSpeed
 end)
 
--- NoClip loop
+-- NoClip loop (каждый кадр)
 game:GetService("RunService").Heartbeat:Connect(function()
     if noclip and char then
         for _, v in pairs(char:GetDescendants()) do
@@ -74,17 +79,16 @@ game:GetService("RunService").Heartbeat:Connect(function()
     end
 end)
 
--- God Mode loop
+-- God Mode loop (каждый кадр)
 game:GetService("RunService").Heartbeat:Connect(function()
     if god and hum then
-        hum.Health = hum.MaxHealth
-        if hum.MaxHealth ~= math.huge then
-            hum.MaxHealth = math.huge
-        end
+        hum.Health = 9e9
+        hum.MaxHealth = 9e9
+        hum.BreakJointsOnDeath = false
     end
 end)
 
--- Infinite Jump loop
+-- Infinite Jump loop (каждый кадр)
 game:GetService("RunService").Heartbeat:Connect(function()
     if infJump and hum then
         local state = hum:GetState()
