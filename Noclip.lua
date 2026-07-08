@@ -4,7 +4,7 @@ local hum = char:FindFirstChild("Humanoid")
 local root = char:FindFirstChild("HumanoidRootPart")
 
 local noclip = false
-local infjump = false
+local fly = false
 local menuOpen = false
 
 local function SetNoClip(state)
@@ -17,8 +17,31 @@ local function SetNoClip(state)
     end
 end
 
-local function SetInfJump(state)
-    infjump = state
+local flySpeed = 50
+local bodyVelocity = nil
+local bodyGyro = nil
+
+local function SetFly(state)
+    fly = state
+    if state then
+        hum.PlatformStand = true
+        bodyVelocity = Instance.new("BodyVelocity")
+        bodyVelocity.MaxForce = Vector3.new(1e9, 1e9, 1e9)
+        bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+        bodyVelocity.Parent = root
+
+        bodyGyro = Instance.new("BodyGyro")
+        bodyGyro.MaxTorque = Vector3.new(1e9, 1e9, 1e9)
+        bodyGyro.P = 1e5
+        bodyGyro.CFrame = root.CFrame
+        bodyGyro.Parent = root
+    else
+        hum.PlatformStand = false
+        if bodyVelocity then bodyVelocity:Destroy() end
+        if bodyGyro then bodyGyro:Destroy() end
+        bodyVelocity = nil
+        bodyGyro = nil
+    end
 end
 
 player.CharacterAdded:Connect(function(newChar)
@@ -26,8 +49,10 @@ player.CharacterAdded:Connect(function(newChar)
     hum = char:FindFirstChild("Humanoid")
     root = char:FindFirstChild("HumanoidRootPart")
     if noclip then SetNoClip(true) end
+    if fly then SetFly(true) end
 end)
 
+-- NoClip loop
 game:GetService("RunService").Heartbeat:Connect(function()
     if noclip and char then
         for _, v in pairs(char:GetDescendants()) do
@@ -38,15 +63,43 @@ game:GetService("RunService").Heartbeat:Connect(function()
     end
 end)
 
+-- Fly loop
 game:GetService("RunService").Heartbeat:Connect(function()
-    if infjump and hum then
-        local state = hum:GetState()
-        if state == Enum.HumanoidStateType.Landed or state == Enum.HumanoidStateType.Freefall then
-            hum:ChangeState(Enum.HumanoidStateType.Jumping)
+    if fly and root and bodyVelocity and bodyGyro then
+        local cam = workspace.CurrentCamera
+        local moveDir = Vector3.new(0, 0, 0)
+        local forward = cam.CFrame.LookVector
+        local right = cam.CFrame.RightVector
+        local up = cam.CFrame.UpVector
+
+        if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.W) then
+            moveDir = moveDir + forward
         end
+        if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.S) then
+            moveDir = moveDir - forward
+        end
+        if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.A) then
+            moveDir = moveDir - right
+        end
+        if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.D) then
+            moveDir = moveDir + right
+        end
+        if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.Space) then
+            moveDir = moveDir + up
+        end
+        if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.LeftShift) then
+            moveDir = moveDir - up
+        end
+
+        if moveDir.Magnitude > 0 then
+            moveDir = moveDir.Unit * flySpeed
+        end
+        bodyVelocity.Velocity = moveDir
+        bodyGyro.CFrame = cam.CFrame
     end
 end)
 
+-- GUI
 local gui = Instance.new("ScreenGui")
 gui.Name = "SWILL"
 gui.ResetOnSpawn = false
@@ -66,8 +119,8 @@ local corner = Instance.new("UICorner", openBtn)
 corner.CornerRadius = UDim.new(1, 0)
 
 local menu = Instance.new("Frame")
-menu.Size = UDim2.new(0, 300, 0, 260)
-menu.Position = UDim2.new(0.5, -150, 0.5, -130)
+menu.Size = UDim2.new(0, 300, 0, 280)
+menu.Position = UDim2.new(0.5, -150, 0.5, -140)
 menu.BackgroundColor3 = Color3.fromRGB(10, 10, 25)
 menu.BackgroundTransparency = 0
 menu.BorderSizePixel = 3
@@ -109,7 +162,7 @@ end)
 
 local ncBtn = Instance.new("TextButton", menu)
 ncBtn.Size = UDim2.new(0.8, 0, 0, 38)
-ncBtn.Position = UDim2.new(0.1, 0, 0.25, 0)
+ncBtn.Position = UDim2.new(0.1, 0, 0.2, 0)
 ncBtn.Text = "NoClip: OFF"
 ncBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 ncBtn.TextSize = 17
@@ -123,25 +176,25 @@ ncBtn.MouseButton1Click:Connect(function()
     ncBtn.BorderColor3 = noclip and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(100, 100, 100)
 end)
 
-local ijBtn = Instance.new("TextButton", menu)
-ijBtn.Size = UDim2.new(0.8, 0, 0, 38)
-ijBtn.Position = UDim2.new(0.1, 0, 0.5, 0)
-ijBtn.Text = "InfJump: OFF"
-ijBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-ijBtn.TextSize = 17
-ijBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 55)
-ijBtn.BorderSizePixel = 2
-ijBtn.BorderColor3 = Color3.fromRGB(100, 100, 100)
-ijBtn.MouseButton1Click:Connect(function()
-    SetInfJump(not infjump)
-    ijBtn.Text = infjump and "InfJump: ON" or "InfJump: OFF"
-    ijBtn.TextColor3 = infjump and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 255, 255)
-    ijBtn.BorderColor3 = infjump and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(100, 100, 100)
+local flyBtn = Instance.new("TextButton", menu)
+flyBtn.Size = UDim2.new(0.8, 0, 0, 38)
+flyBtn.Position = UDim2.new(0.1, 0, 0.45, 0)
+flyBtn.Text = "Fly: OFF"
+flyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+flyBtn.TextSize = 17
+flyBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 55)
+flyBtn.BorderSizePixel = 2
+flyBtn.BorderColor3 = Color3.fromRGB(100, 100, 100)
+flyBtn.MouseButton1Click:Connect(function()
+    SetFly(not fly)
+    flyBtn.Text = fly and "Fly: ON" or "Fly: OFF"
+    flyBtn.TextColor3 = fly and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 255, 255)
+    flyBtn.BorderColor3 = fly and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(100, 100, 100)
 end)
 
 local both = Instance.new("TextButton", menu)
 both.Size = UDim2.new(0.8, 0, 0, 38)
-both.Position = UDim2.new(0.1, 0, 0.75, 0)
+both.Position = UDim2.new(0.1, 0, 0.7, 0)
 both.Text = "Enable All"
 both.TextColor3 = Color3.fromRGB(255, 255, 255)
 both.TextSize = 17
@@ -150,13 +203,13 @@ both.BorderSizePixel = 2
 both.BorderColor3 = Color3.fromRGB(0, 255, 0)
 both.MouseButton1Click:Connect(function()
     SetNoClip(true)
-    SetInfJump(true)
+    SetFly(true)
     ncBtn.Text = "NoClip: ON"
     ncBtn.TextColor3 = Color3.fromRGB(0, 255, 0)
     ncBtn.BorderColor3 = Color3.fromRGB(0, 255, 0)
-    ijBtn.Text = "InfJump: ON"
-    ijBtn.TextColor3 = Color3.fromRGB(0, 255, 0)
-    ijBtn.BorderColor3 = Color3.fromRGB(0, 255, 0)
+    flyBtn.Text = "Fly: ON"
+    flyBtn.TextColor3 = Color3.fromRGB(0, 255, 0)
+    flyBtn.BorderColor3 = Color3.fromRGB(0, 255, 0)
 end)
 
 openBtn.MouseButton1Click:Connect(function()
