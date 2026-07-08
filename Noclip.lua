@@ -6,6 +6,7 @@ local root = char:FindFirstChild("HumanoidRootPart")
 local noclip = false
 local fly = false
 local flySpeed = 50
+local walkSpeed = 16
 local menuOpen = false
 
 local bodyPosition = nil
@@ -52,9 +53,9 @@ player.CharacterAdded:Connect(function(newChar)
     root = char:FindFirstChild("HumanoidRootPart")
     if noclip then SetNoClip(true) end
     if fly then SetFly(true) end
+    hum.WalkSpeed = walkSpeed
 end)
 
--- NoClip
 game:GetService("RunService").Heartbeat:Connect(function()
     if noclip and char then
         for _, v in pairs(char:GetDescendants()) do
@@ -65,7 +66,6 @@ game:GetService("RunService").Heartbeat:Connect(function()
     end
 end)
 
--- Fly
 game:GetService("RunService").Heartbeat:Connect(function()
     if fly and root and bodyPosition and bodyGyro then
         local cam = workspace.CurrentCamera
@@ -109,8 +109,8 @@ local corner = Instance.new("UICorner", openBtn)
 corner.CornerRadius = UDim.new(1, 0)
 
 local menu = Instance.new("Frame")
-menu.Size = UDim2.new(0, 320, 0, 340)
-menu.Position = UDim2.new(0.5, -160, 0.5, -170)
+menu.Size = UDim2.new(0, 340, 0, 420)
+menu.Position = UDim2.new(0.5, -170, 0.5, -210)
 menu.BackgroundColor3 = Color3.fromRGB(10, 10, 25)
 menu.BackgroundTransparency = 0
 menu.BorderSizePixel = 3
@@ -151,11 +151,11 @@ close.MouseButton1Click:Connect(function()
 end)
 
 local ncBtn = Instance.new("TextButton", menu)
-ncBtn.Size = UDim2.new(0.8, 0, 0, 35)
-ncBtn.Position = UDim2.new(0.1, 0, 0.18, 0)
+ncBtn.Size = UDim2.new(0.8, 0, 0, 30)
+ncBtn.Position = UDim2.new(0.1, 0, 0.14, 0)
 ncBtn.Text = "NoClip: OFF"
 ncBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-ncBtn.TextSize = 16
+ncBtn.TextSize = 15
 ncBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 55)
 ncBtn.BorderSizePixel = 2
 ncBtn.BorderColor3 = Color3.fromRGB(100, 100, 100)
@@ -167,11 +167,11 @@ ncBtn.MouseButton1Click:Connect(function()
 end)
 
 local flyBtn = Instance.new("TextButton", menu)
-flyBtn.Size = UDim2.new(0.8, 0, 0, 35)
-flyBtn.Position = UDim2.new(0.1, 0, 0.38, 0)
+flyBtn.Size = UDim2.new(0.8, 0, 0, 30)
+flyBtn.Position = UDim2.new(0.1, 0, 0.28, 0)
 flyBtn.Text = "Fly: OFF"
 flyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-flyBtn.TextSize = 16
+flyBtn.TextSize = 15
 flyBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 55)
 flyBtn.BorderSizePixel = 2
 flyBtn.BorderColor3 = Color3.fromRGB(100, 100, 100)
@@ -182,69 +182,112 @@ flyBtn.MouseButton1Click:Connect(function()
     flyBtn.BorderColor3 = fly and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(100, 100, 100)
 end)
 
-local speedLabel = Instance.new("TextLabel", menu)
-speedLabel.Size = UDim2.new(0.8, 0, 0, 25)
-speedLabel.Position = UDim2.new(0.1, 0, 0.55, 0)
-speedLabel.Text = "Speed: 50"
-speedLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
-speedLabel.TextSize = 15
-speedLabel.BackgroundTransparency = 1
-speedLabel.Font = Enum.Font.Gotham
+-- Speed Fly
+local speedFlyLabel = Instance.new("TextLabel", menu)
+speedFlyLabel.Size = UDim2.new(0.8, 0, 0, 20)
+speedFlyLabel.Position = UDim2.new(0.1, 0, 0.40, 0)
+speedFlyLabel.Text = "Fly Speed: 50"
+speedFlyLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+speedFlyLabel.TextSize = 14
+speedFlyLabel.BackgroundTransparency = 1
+speedFlyLabel.Font = Enum.Font.Gotham
 
-local slider = Instance.new("Frame", menu)
-slider.Size = UDim2.new(0.8, 0, 0, 12)
-slider.Position = UDim2.new(0.1, 0, 0.62, 0)
-slider.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
-slider.BorderSizePixel = 0
+local sliderFly = Instance.new("Frame", menu)
+sliderFly.Size = UDim2.new(0.8, 0, 0, 10)
+sliderFly.Position = UDim2.new(0.1, 0, 0.46, 0)
+sliderFly.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
+sliderFly.BorderSizePixel = 0
 
-local fill = Instance.new("Frame", slider)
-fill.Size = UDim2.new(0.5, 0, 1, 0)
-fill.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
-fill.BorderSizePixel = 0
+local fillFly = Instance.new("Frame", sliderFly)
+fillFly.Size = UDim2.new(0.5, 0, 1, 0)
+fillFly.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
+fillFly.BorderSizePixel = 0
 
-local sliderBtn = Instance.new("TextButton", slider)
-sliderBtn.Size = UDim2.new(0, 24, 0, 24)
-sliderBtn.Position = UDim2.new(0.5, -12, 0.5, -12)
-sliderBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-sliderBtn.BorderSizePixel = 2
-sliderBtn.BorderColor3 = Color3.fromRGB(0, 200, 255)
-sliderBtn.Text = ""
-local sliderCorner = Instance.new("UICorner", sliderBtn)
-sliderCorner.CornerRadius = UDim.new(1, 0)
+local sliderFlyBtn = Instance.new("TextButton", sliderFly)
+sliderFlyBtn.Size = UDim2.new(0, 20, 0, 20)
+sliderFlyBtn.Position = UDim2.new(0.5, -10, 0.5, -10)
+sliderFlyBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+sliderFlyBtn.BorderSizePixel = 2
+sliderFlyBtn.BorderColor3 = Color3.fromRGB(0, 200, 255)
+sliderFlyBtn.Text = ""
+local cornerFly = Instance.new("UICorner", sliderFlyBtn)
+cornerFly.CornerRadius = UDim.new(1, 0)
 
-local dragging = false
-local dragConn = nil
-local dragEndConn = nil
+-- Speed Walk
+local speedWalkLabel = Instance.new("TextLabel", menu)
+speedWalkLabel.Size = UDim2.new(0.8, 0, 0, 20)
+speedWalkLabel.Position = UDim2.new(0.1, 0, 0.56, 0)
+speedWalkLabel.Text = "Walk Speed: 16"
+speedWalkLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+speedWalkLabel.TextSize = 14
+speedWalkLabel.BackgroundTransparency = 1
+speedWalkLabel.Font = Enum.Font.Gotham
 
-sliderBtn.MouseButton1Down:Connect(function()
-    dragging = true
-    dragConn = game:GetService("UserInputService").InputChanged:Connect(function(input)
-        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+local sliderWalk = Instance.new("Frame", menu)
+sliderWalk.Size = UDim2.new(0.8, 0, 0, 10)
+sliderWalk.Position = UDim2.new(0.1, 0, 0.62, 0)
+sliderWalk.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
+sliderWalk.BorderSizePixel = 0
+
+local fillWalk = Instance.new("Frame", sliderWalk)
+fillWalk.Size = UDim2.new(0.16, 0, 1, 0)
+fillWalk.BackgroundColor3 = Color3.fromRGB(0, 255, 100)
+fillWalk.BorderSizePixel = 0
+
+local sliderWalkBtn = Instance.new("TextButton", sliderWalk)
+sliderWalkBtn.Size = UDim2.new(0, 20, 0, 20)
+sliderWalkBtn.Position = UDim2.new(0.16, -10, 0.5, -10)
+sliderWalkBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+sliderWalkBtn.BorderSizePixel = 2
+sliderWalkBtn.BorderColor3 = Color3.fromRGB(0, 255, 100)
+sliderWalkBtn.Text = ""
+local cornerWalk = Instance.new("UICorner", sliderWalkBtn)
+cornerWalk.CornerRadius = UDim.new(1, 0)
+
+local function SetupSlider(slider, fill, btn, label, minVal, maxVal, callback)
+    local dragging = false
+    btn.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+        end
+    end)
+    btn.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
+        end
+    end)
+    game:GetService("UserInputService").InputChanged:Connect(function(input)
+        if dragging and (input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseMovement) then
             local x = input.Position.X
             local absX = slider.AbsolutePosition.X
             local sizeX = slider.AbsoluteSize.X
-            local pos = math.clamp((x - absX) / sizeX, 0, 1)
-            fill.Size = UDim2.new(pos, 0, 1, 0)
-            sliderBtn.Position = UDim2.new(pos, -12, 0.5, -12)
-            flySpeed = math.round(10 + pos * 190)
-            speedLabel.Text = "Speed: " .. flySpeed
+            if sizeX > 0 then
+                local pos = math.clamp((x - absX) / sizeX, 0, 1)
+                fill.Size = UDim2.new(pos, 0, 1, 0)
+                btn.Position = UDim2.new(pos, -10, 0.5, -10)
+                local value = math.round(minVal + pos * (maxVal - minVal))
+                label.Text = label.Text:gsub("%d+$", "") .. value
+                callback(value)
+            end
         end
     end)
-    dragEndConn = game:GetService("UserInputService").InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement then
-            dragging = false
-            if dragConn then dragConn:Disconnect() end
-            if dragEndConn then dragEndConn:Disconnect() end
-        end
-    end)
+end
+
+SetupSlider(sliderFly, fillFly, sliderFlyBtn, speedFlyLabel, 10, 200, function(v)
+    flySpeed = v
+end)
+
+SetupSlider(sliderWalk, fillWalk, sliderWalkBtn, speedWalkLabel, 1, 10000, function(v)
+    walkSpeed = v
+    if hum then hum.WalkSpeed = v end
 end)
 
 local both = Instance.new("TextButton", menu)
-both.Size = UDim2.new(0.8, 0, 0, 35)
+both.Size = UDim2.new(0.8, 0, 0, 30)
 both.Position = UDim2.new(0.1, 0, 0.78, 0)
 both.Text = "Enable All"
 both.TextColor3 = Color3.fromRGB(255, 255, 255)
-both.TextSize = 16
+both.TextSize = 15
 both.BackgroundColor3 = Color3.fromRGB(0, 90, 0)
 both.BorderSizePixel = 2
 both.BorderColor3 = Color3.fromRGB(0, 255, 0)
