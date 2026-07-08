@@ -1,4 +1,4 @@
--- Drunix Hub (Red Theme) :: NoClip + InfJump + God Mode + WalkSpeed
+-- Drunix Hub (Red Theme) :: NoClip + InfJump + God Mode
 local player = game.Players.LocalPlayer
 local char = player.Character or player.CharacterAdded:Wait()
 local hum = char:FindFirstChild("Humanoid")
@@ -10,7 +10,7 @@ local god = false
 local walkSpeed = 16
 local menuOpen = false
 
--- GOD MODE (реальное бессмертие)
+-- GOD MODE
 local function SetGod(state)
     god = state
     if state then
@@ -24,7 +24,7 @@ local function SetGod(state)
     end
 end
 
--- INFINITE JUMP (как в FoxnameHub)
+-- INFINITE JUMP
 local jumpCon
 local function SetInfJump(state)
     infJump = state
@@ -53,22 +53,17 @@ local function SetNoClip(state)
     end
 end
 
--- Перезагрузка персонажа (сохраняем всё)
 player.CharacterAdded:Connect(function(newChar)
     char = newChar
     hum = char:WaitForChild("Humanoid")
     root = char:WaitForChild("HumanoidRootPart")
-    
     if noclip then SetNoClip(true) end
-    if infJump then 
-        SetInfJump(true) 
-        startInfJump() 
-    end
+    if infJump then SetInfJump(true) startInfJump() end
     if god then SetGod(true) end
     hum.WalkSpeed = walkSpeed
 end)
 
--- NoClip loop (каждый кадр)
+-- Loops
 game:GetService("RunService").Heartbeat:Connect(function()
     if noclip and char then
         for _, v in pairs(char:GetDescendants()) do
@@ -79,7 +74,6 @@ game:GetService("RunService").Heartbeat:Connect(function()
     end
 end)
 
--- God Mode loop (каждый кадр)
 game:GetService("RunService").Heartbeat:Connect(function()
     if god and hum then
         hum.Health = 9e9
@@ -88,7 +82,6 @@ game:GetService("RunService").Heartbeat:Connect(function()
     end
 end)
 
--- Infinite Jump loop (каждый кадр)
 game:GetService("RunService").Heartbeat:Connect(function()
     if infJump and hum then
         local state = hum:GetState()
@@ -98,11 +91,48 @@ game:GetService("RunService").Heartbeat:Connect(function()
     end
 end)
 
--- GUI (Red Theme)
+-- GUI
 local gui = Instance.new("ScreenGui")
 gui.Name = "DrunixHub"
 gui.ResetOnSpawn = false
 
+-- КНОПКА INFINITE JUMP (отдельная, перетаскиваемая)
+local jumpBtn = Instance.new("TextButton")
+jumpBtn.Size = UDim2.new(0, 80, 0, 80)
+jumpBtn.Position = UDim2.new(0.85, -40, 0.5, -40)
+jumpBtn.BackgroundColor3 = Color3.fromRGB(180, 0, 0)
+jumpBtn.BackgroundTransparency = 0
+jumpBtn.BorderSizePixel = 3
+jumpBtn.BorderColor3 = Color3.fromRGB(255, 50, 50)
+jumpBtn.Text = "Jump"
+jumpBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+jumpBtn.TextSize = 18
+jumpBtn.Font = Enum.Font.GothamBold
+jumpBtn.Draggable = true
+jumpBtn.Active = true
+local cornerJump = Instance.new("UICorner", jumpBtn)
+cornerJump.CornerRadius = UDim.new(1, 0)
+
+-- Текст статуса на кнопке
+local statusText = Instance.new("TextLabel", jumpBtn)
+statusText.Size = UDim2.new(1, 0, 0, 20)
+statusText.Position = UDim2.new(0, 0, 0.7, 0)
+statusText.Text = "OFF"
+statusText.TextColor3 = Color3.fromRGB(255, 100, 100)
+statusText.TextSize = 14
+statusText.BackgroundTransparency = 1
+statusText.Font = Enum.Font.GothamBold
+
+jumpBtn.MouseButton1Click:Connect(function()
+    SetInfJump(not infJump)
+    if infJump then startInfJump() end
+    jumpBtn.Text = infJump and "Jump ON" or "Jump"
+    statusText.Text = infJump and "ON" or "OFF"
+    statusText.TextColor3 = infJump and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 100, 100)
+    jumpBtn.BorderColor3 = infJump and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 50, 50)
+end)
+
+-- КНОПКА ОТКРЫТИЯ МЕНЮ (по центру)
 local openBtn = Instance.new("ImageButton")
 openBtn.Size = UDim2.new(0, 70, 0, 70)
 openBtn.Position = UDim2.new(0.5, -35, 0.5, -35)
@@ -117,9 +147,10 @@ openBtn.Active = true
 local corner = Instance.new("UICorner", openBtn)
 corner.CornerRadius = UDim.new(1, 0)
 
+-- МЕНЮ
 local menu = Instance.new("Frame")
-menu.Size = UDim2.new(0, 320, 0, 430)
-menu.Position = UDim2.new(0.5, -160, 0.5, -215)
+menu.Size = UDim2.new(0, 320, 0, 380)
+menu.Position = UDim2.new(0.5, -160, 0.5, -190)
 menu.BackgroundColor3 = Color3.fromRGB(20, 0, 0)
 menu.BackgroundTransparency = 0
 menu.BorderSizePixel = 3
@@ -154,7 +185,7 @@ end)
 
 local ncBtn = Instance.new("TextButton", menu)
 ncBtn.Size = UDim2.new(0.8, 0, 0, 32)
-ncBtn.Position = UDim2.new(0.1, 0, 0.14, 0)
+ncBtn.Position = UDim2.new(0.1, 0, 0.16, 0)
 ncBtn.Text = "NoClip: OFF"
 ncBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 ncBtn.TextSize = 15
@@ -168,26 +199,9 @@ ncBtn.MouseButton1Click:Connect(function()
     ncBtn.BorderColor3 = noclip and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(150, 50, 50)
 end)
 
-local jumpBtn = Instance.new("TextButton", menu)
-jumpBtn.Size = UDim2.new(0.8, 0, 0, 32)
-jumpBtn.Position = UDim2.new(0.1, 0, 0.30, 0)
-jumpBtn.Text = "InfJump: OFF"
-jumpBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-jumpBtn.TextSize = 15
-jumpBtn.BackgroundColor3 = Color3.fromRGB(40, 0, 0)
-jumpBtn.BorderSizePixel = 2
-jumpBtn.BorderColor3 = Color3.fromRGB(150, 50, 50)
-jumpBtn.MouseButton1Click:Connect(function()
-    SetInfJump(not infJump)
-    if infJump then startInfJump() end
-    jumpBtn.Text = infJump and "InfJump: ON" or "InfJump: OFF"
-    jumpBtn.TextColor3 = infJump and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 255, 255)
-    jumpBtn.BorderColor3 = infJump and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(150, 50, 50)
-end)
-
 local godBtn = Instance.new("TextButton", menu)
 godBtn.Size = UDim2.new(0.8, 0, 0, 32)
-godBtn.Position = UDim2.new(0.1, 0, 0.46, 0)
+godBtn.Position = UDim2.new(0.1, 0, 0.36, 0)
 godBtn.Text = "God Mode: OFF"
 godBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 godBtn.TextSize = 15
@@ -203,7 +217,7 @@ end)
 
 local speedLabel = Instance.new("TextLabel", menu)
 speedLabel.Size = UDim2.new(0.8, 0, 0, 20)
-speedLabel.Position = UDim2.new(0.1, 0, 0.60, 0)
+speedLabel.Position = UDim2.new(0.1, 0, 0.52, 0)
 speedLabel.Text = "Walk Speed: 16"
 speedLabel.TextColor3 = Color3.fromRGB(200, 150, 150)
 speedLabel.TextSize = 14
@@ -212,7 +226,7 @@ speedLabel.Font = Enum.Font.Gotham
 
 local sliderWalk = Instance.new("Frame", menu)
 sliderWalk.Size = UDim2.new(0.8, 0, 0, 10)
-sliderWalk.Position = UDim2.new(0.1, 0, 0.67, 0)
+sliderWalk.Position = UDim2.new(0.1, 0, 0.59, 0)
 sliderWalk.BackgroundColor3 = Color3.fromRGB(60, 20, 20)
 sliderWalk.BorderSizePixel = 0
 
@@ -267,7 +281,7 @@ end)
 
 local both = Instance.new("TextButton", menu)
 both.Size = UDim2.new(0.8, 0, 0, 32)
-both.Position = UDim2.new(0.1, 0, 0.82, 0)
+both.Position = UDim2.new(0.1, 0, 0.76, 0)
 both.Text = "Enable All"
 both.TextColor3 = Color3.fromRGB(255, 255, 255)
 both.TextSize = 15
@@ -282,12 +296,13 @@ both.MouseButton1Click:Connect(function()
     ncBtn.Text = "NoClip: ON"
     ncBtn.TextColor3 = Color3.fromRGB(0, 255, 0)
     ncBtn.BorderColor3 = Color3.fromRGB(0, 255, 0)
-    jumpBtn.Text = "InfJump: ON"
-    jumpBtn.TextColor3 = Color3.fromRGB(0, 255, 0)
-    jumpBtn.BorderColor3 = Color3.fromRGB(0, 255, 0)
     godBtn.Text = "God Mode: ON"
     godBtn.TextColor3 = Color3.fromRGB(0, 255, 0)
     godBtn.BorderColor3 = Color3.fromRGB(0, 255, 0)
+    jumpBtn.Text = "Jump ON"
+    statusText.Text = "ON"
+    statusText.TextColor3 = Color3.fromRGB(0, 255, 0)
+    jumpBtn.BorderColor3 = Color3.fromRGB(0, 255, 0)
 end)
 
 openBtn.MouseButton1Click:Connect(function()
@@ -295,6 +310,8 @@ openBtn.MouseButton1Click:Connect(function()
     menu.Visible = menuOpen
 end)
 
+-- Родитель
 openBtn.Parent = gui
 menu.Parent = gui
+jumpBtn.Parent = gui
 gui.Parent = game:GetService("CoreGui")
