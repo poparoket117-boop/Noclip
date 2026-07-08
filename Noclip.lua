@@ -10,7 +10,7 @@ local flySpeed = 50
 local walkSpeed = 16
 local menuOpen = false
 
-local bodyVelocity = nil
+local bodyPosition = nil
 local bodyGyro = nil
 
 local function SetNoClip(state)
@@ -27,10 +27,12 @@ local function SetFly(state)
     fly = state
     if state then
         hum.PlatformStand = true
-        bodyVelocity = Instance.new("BodyVelocity")
-        bodyVelocity.MaxForce = Vector3.new(1e9, 1e9, 1e9)
-        bodyVelocity.Velocity = Vector3.new(0, 0, 0)
-        bodyVelocity.Parent = root
+        bodyPosition = Instance.new("BodyPosition")
+        bodyPosition.MaxForce = Vector3.new(1e9, 1e9, 1e9)
+        bodyPosition.P = 5000
+        bodyPosition.D = 500
+        bodyPosition.Position = root.Position
+        bodyPosition.Parent = root
 
         bodyGyro = Instance.new("BodyGyro")
         bodyGyro.MaxTorque = Vector3.new(1e9, 1e9, 1e9)
@@ -39,9 +41,9 @@ local function SetFly(state)
         bodyGyro.Parent = root
     else
         hum.PlatformStand = false
-        if bodyVelocity then bodyVelocity:Destroy() end
+        if bodyPosition then bodyPosition:Destroy() end
         if bodyGyro then bodyGyro:Destroy() end
-        bodyVelocity = nil
+        bodyPosition = nil
         bodyGyro = nil
     end
 end
@@ -80,7 +82,7 @@ game:GetService("RunService").Heartbeat:Connect(function()
 end)
 
 game:GetService("RunService").Heartbeat:Connect(function()
-    if fly and root and bodyVelocity and bodyGyro then
+    if fly and root and bodyPosition and bodyGyro then
         local cam = workspace.CurrentCamera
         local moveDir = Vector3.new(0, 0, 0)
         local forward = cam.CFrame.LookVector
@@ -98,12 +100,11 @@ game:GetService("RunService").Heartbeat:Connect(function()
         if moveDir.Magnitude > 0 then
             moveDir = moveDir.Unit * flySpeed
         end
-        bodyVelocity.Velocity = moveDir
+        bodyPosition.Position = root.Position + moveDir
         bodyGyro.CFrame = cam.CFrame
     end
 end)
 
--- God Mode loop
 game:GetService("RunService").Heartbeat:Connect(function()
     if god and hum then
         hum.Health = hum.MaxHealth
