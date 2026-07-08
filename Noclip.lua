@@ -9,6 +9,7 @@ local menuOpen = false
 
 local function SetNoClip(state)
     noclip = state
+    if not char then return end
     for _, v in pairs(char:GetDescendants()) do
         if v:IsA("BasePart") then
             v.CanCollide = not state
@@ -27,7 +28,6 @@ player.CharacterAdded:Connect(function(newChar)
     if noclip then SetNoClip(true) end
 end)
 
--- NoClip loop
 game:GetService("RunService").Heartbeat:Connect(function()
     if noclip and char then
         for _, v in pairs(char:GetDescendants()) do
@@ -35,13 +35,6 @@ game:GetService("RunService").Heartbeat:Connect(function()
                 v.CanCollide = false
             end
         end
-    end
-end)
-
--- InfJump loop
-game:GetService("UserInputService").JumpRequest:Connect(function()
-    if infjump and hum then
-        hum:ChangeState(Enum.HumanoidStateType.Jumping)
     end
 end)
 
@@ -54,16 +47,14 @@ game:GetService("RunService").Heartbeat:Connect(function()
     end
 end)
 
--- GUI
 local gui = Instance.new("ScreenGui")
 gui.Name = "SWILL"
 gui.ResetOnSpawn = false
 
--- Круглая кнопка (по центру)
 local openBtn = Instance.new("ImageButton")
-openBtn.Size = UDim2.new(0, 65, 0, 65)
-openBtn.Position = UDim2.new(0.5, -32, 0.5, -32)
-openBtn.BackgroundColor3 = Color3.fromRGB(0, 180, 255)
+openBtn.Size = UDim2.new(0, 70, 0, 70)
+openBtn.Position = UDim2.new(0.5, -35, 0.5, -35)
+openBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
 openBtn.BackgroundTransparency = 0
 openBtn.BorderSizePixel = 3
 openBtn.BorderColor3 = Color3.fromRGB(0, 255, 255)
@@ -71,12 +62,10 @@ openBtn.Image = "rbxassetid://6023420470"
 openBtn.ImageColor3 = Color3.fromRGB(255, 255, 255)
 openBtn.Draggable = true
 openBtn.Active = true
--- Скругление
 local corner = Instance.new("UICorner", openBtn)
 corner.CornerRadius = UDim.new(1, 0)
 
--- Меню с фоном
-local menu = Instance.New("Frame")
+local menu = Instance.new("Frame")
 menu.Size = UDim2.new(0, 300, 0, 260)
 menu.Position = UDim2.new(0.5, -150, 0.5, -130)
 menu.BackgroundColor3 = Color3.fromRGB(10, 10, 25)
@@ -87,14 +76,12 @@ menu.Visible = false
 menu.Active = true
 menu.Draggable = true
 
--- Фоновое изображение в меню
-local bgImage = Instance.New("ImageLabel", menu)
-bgImage.Size = UDim2.new(1, 0, 1, 0)
-bgImage.Position = UDim2.new(0, 0, 0, 0)
-bgImage.BackgroundTransparency = 1
-bgImage.Image = "rbxassetid://6031090944"
-bgImage.ImageColor3 = Color3.fromRGB(40, 40, 60)
-bgImage.ImageTransparency = 0.5
+local bg = Instance.new("ImageLabel", menu)
+bg.Size = UDim2.new(1, 0, 1, 0)
+bg.BackgroundTransparency = 1
+bg.Image = "rbxassetid://6031090944"
+bg.ImageColor3 = Color3.fromRGB(50, 50, 70)
+bg.ImageTransparency = 0.4
 
 local title = Instance.new("TextLabel", menu)
 title.Size = UDim2.new(1, 0, 0, 40)
