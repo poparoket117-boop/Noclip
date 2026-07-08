@@ -1,4 +1,4 @@
--- SWILL :: God Mode + Fly (взято из FoxnameHub)
+-- SWILL :: God Mode + Fly (100% из FoxnameHub) + вход по картинке кота
 local player = game.Players.LocalPlayer
 local char = player.Character or player.CharacterAdded:Wait()
 local hum = char:FindFirstChild("Humanoid")
@@ -11,7 +11,7 @@ local flySpeed = 50
 local walkSpeed = 16
 local menuOpen = false
 
--- God Mode (из FoxnameHub)
+-- GOD MODE (точный код из FoxnameHub)
 local function SetGod(state)
     god = state
     if state then
@@ -25,7 +25,7 @@ local function SetGod(state)
     end
 end
 
--- Fly (из FoxnameHub)
+-- FLY (точный код из FoxnameHub)
 local bodyVelocity = nil
 local bodyGyro = nil
 local function SetFly(state)
@@ -117,25 +117,27 @@ game:GetService("RunService").Heartbeat:Connect(function()
     end
 end)
 
--- GUI (меню)
+-- GUI
 local gui = Instance.new("ScreenGui")
 gui.Name = "SWILL"
 gui.ResetOnSpawn = false
 
+-- Кнопка входа с картинкой кота (круглая)
 local openBtn = Instance.new("ImageButton")
-openBtn.Size = UDim2.new(0, 70, 0, 70)
-openBtn.Position = UDim2.new(0.5, -35, 0.5, -35)
-openBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+openBtn.Size = UDim2.new(0, 75, 0, 75)
+openBtn.Position = UDim2.new(0.5, -37, 0.5, -37)
+openBtn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 openBtn.BackgroundTransparency = 0
 openBtn.BorderSizePixel = 3
-openBtn.BorderColor3 = Color3.fromRGB(0, 255, 255)
-openBtn.Image = "rbxassetid://6023420470"
+openBtn.BorderColor3 = Color3.fromRGB(255, 200, 100)
+openBtn.Image = "rbxassetid://6031090944" -- Картинка кота (можно заменить на свой ID)
 openBtn.ImageColor3 = Color3.fromRGB(255, 255, 255)
 openBtn.Draggable = true
 openBtn.Active = true
 local corner = Instance.new("UICorner", openBtn)
 corner.CornerRadius = UDim.new(1, 0)
 
+-- Меню
 local menu = Instance.new("Frame")
 menu.Size = UDim2.new(0, 340, 0, 480)
 menu.Position = UDim2.new(0.5, -170, 0.5, -240)
