@@ -8,7 +8,7 @@ local fly = false
 local flySpeed = 50
 local menuOpen = false
 
-local bodyVelocity = nil
+local bodyPosition = nil
 local bodyGyro = nil
 
 local function SetNoClip(state)
@@ -25,10 +25,12 @@ local function SetFly(state)
     fly = state
     if state then
         hum.PlatformStand = true
-        bodyVelocity = Instance.new("BodyVelocity")
-        bodyVelocity.MaxForce = Vector3.new(1e9, 1e9, 1e9)
-        bodyVelocity.Velocity = Vector3.new(0, 0, 0)
-        bodyVelocity.Parent = root
+        bodyPosition = Instance.new("BodyPosition")
+        bodyPosition.MaxForce = Vector3.new(1e9, 1e9, 1e9)
+        bodyPosition.P = 5000
+        bodyPosition.D = 500
+        bodyPosition.Position = root.Position
+        bodyPosition.Parent = root
 
         bodyGyro = Instance.new("BodyGyro")
         bodyGyro.MaxTorque = Vector3.new(1e9, 1e9, 1e9)
@@ -37,9 +39,9 @@ local function SetFly(state)
         bodyGyro.Parent = root
     else
         hum.PlatformStand = false
-        if bodyVelocity then bodyVelocity:Destroy() end
+        if bodyPosition then bodyPosition:Destroy() end
         if bodyGyro then bodyGyro:Destroy() end
-        bodyVelocity = nil
+        bodyPosition = nil
         bodyGyro = nil
     end
 end
@@ -52,6 +54,7 @@ player.CharacterAdded:Connect(function(newChar)
     if fly then SetFly(true) end
 end)
 
+-- NoClip
 game:GetService("RunService").Heartbeat:Connect(function()
     if noclip and char then
         for _, v in pairs(char:GetDescendants()) do
@@ -62,8 +65,9 @@ game:GetService("RunService").Heartbeat:Connect(function()
     end
 end)
 
+-- Fly
 game:GetService("RunService").Heartbeat:Connect(function()
-    if fly and root and bodyVelocity and bodyGyro then
+    if fly and root and bodyPosition and bodyGyro then
         local cam = workspace.CurrentCamera
         local moveDir = Vector3.new(0, 0, 0)
         local forward = cam.CFrame.LookVector
@@ -81,7 +85,7 @@ game:GetService("RunService").Heartbeat:Connect(function()
         if moveDir.Magnitude > 0 then
             moveDir = moveDir.Unit * flySpeed
         end
-        bodyVelocity.Velocity = moveDir
+        bodyPosition.Position = root.Position + moveDir
         bodyGyro.CFrame = cam.CFrame
     end
 end)
@@ -105,8 +109,8 @@ local corner = Instance.new("UICorner", openBtn)
 corner.CornerRadius = UDim.new(1, 0)
 
 local menu = Instance.new("Frame")
-menu.Size = UDim2.new(0, 320, 0, 330)
-menu.Position = UDim2.new(0.5, -160, 0.5, -165)
+menu.Size = UDim2.new(0, 320, 0, 340)
+menu.Position = UDim2.new(0.5, -160, 0.5, -170)
 menu.BackgroundColor3 = Color3.fromRGB(10, 10, 25)
 menu.BackgroundTransparency = 0
 menu.BorderSizePixel = 3
@@ -178,7 +182,6 @@ flyBtn.MouseButton1Click:Connect(function()
     flyBtn.BorderColor3 = fly and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(100, 100, 100)
 end)
 
--- Ползунок скорости
 local speedLabel = Instance.new("TextLabel", menu)
 speedLabel.Size = UDim2.new(0.8, 0, 0, 25)
 speedLabel.Position = UDim2.new(0.1, 0, 0.55, 0)
@@ -189,7 +192,7 @@ speedLabel.BackgroundTransparency = 1
 speedLabel.Font = Enum.Font.Gotham
 
 local slider = Instance.new("Frame", menu)
-slider.Size = UDim2.new(0.8, 0, 0, 10)
+slider.Size = UDim2.new(0.8, 0, 0, 12)
 slider.Position = UDim2.new(0.1, 0, 0.62, 0)
 slider.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
 slider.BorderSizePixel = 0
@@ -200,33 +203,40 @@ fill.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
 fill.BorderSizePixel = 0
 
 local sliderBtn = Instance.new("TextButton", slider)
-sliderBtn.Size = UDim2.new(0, 20, 0, 20)
-sliderBtn.Position = UDim2.new(0.5, -10, 0.5, -10)
+sliderBtn.Size = UDim2.new(0, 24, 0, 24)
+sliderBtn.Position = UDim2.new(0.5, -12, 0.5, -12)
 sliderBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-sliderBtn.BorderSizePixel = 1
+sliderBtn.BorderSizePixel = 2
 sliderBtn.BorderColor3 = Color3.fromRGB(0, 200, 255)
 sliderBtn.Text = ""
 local sliderCorner = Instance.new("UICorner", sliderBtn)
 sliderCorner.CornerRadius = UDim.new(1, 0)
 
 local dragging = false
+local dragConn = nil
+local dragEndConn = nil
+
 sliderBtn.MouseButton1Down:Connect(function()
     dragging = true
-end)
-sliderBtn.MouseButton1Up:Connect(function()
-    dragging = false
-end)
-game:GetService("UserInputService").InputChanged:Connect(function(input)
-    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-        local x = input.Position.X
-        local absX = slider.AbsolutePosition.X
-        local sizeX = slider.AbsoluteSize.X
-        local pos = math.clamp((x - absX) / sizeX, 0, 1)
-        fill.Size = UDim2.new(pos, 0, 1, 0)
-        sliderBtn.Position = UDim2.new(pos, -10, 0.5, -10)
-        flySpeed = math.round(10 + pos * 190)
-        speedLabel.Text = "Speed: " .. flySpeed
-    end
+    dragConn = game:GetService("UserInputService").InputChanged:Connect(function(input)
+        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local x = input.Position.X
+            local absX = slider.AbsolutePosition.X
+            local sizeX = slider.AbsoluteSize.X
+            local pos = math.clamp((x - absX) / sizeX, 0, 1)
+            fill.Size = UDim2.new(pos, 0, 1, 0)
+            sliderBtn.Position = UDim2.new(pos, -12, 0.5, -12)
+            flySpeed = math.round(10 + pos * 190)
+            speedLabel.Text = "Speed: " .. flySpeed
+        end
+    end)
+    dragEndConn = game:GetService("UserInputService").InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement then
+            dragging = false
+            if dragConn then dragConn:Disconnect() end
+            if dragEndConn then dragEndConn:Disconnect() end
+        end
+    end)
 end)
 
 local both = Instance.new("TextButton", menu)
