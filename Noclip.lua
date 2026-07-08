@@ -1,3 +1,4 @@
+-- SWILL :: God Mode + Fly (взято из FoxnameHub)
 local player = game.Players.LocalPlayer
 local char = player.Character or player.CharacterAdded:Wait()
 local hum = char:FindFirstChild("Humanoid")
@@ -10,44 +11,7 @@ local flySpeed = 50
 local walkSpeed = 16
 local menuOpen = false
 
-local bodyPosition = nil
-local bodyGyro = nil
-
-local function SetNoClip(state)
-    noclip = state
-    if not char then return end
-    for _, v in pairs(char:GetDescendants()) do
-        if v:IsA("BasePart") then
-            v.CanCollide = not state
-        end
-    end
-end
-
-local function SetFly(state)
-    fly = state
-    if state then
-        hum.PlatformStand = true
-        bodyPosition = Instance.new("BodyPosition")
-        bodyPosition.MaxForce = Vector3.new(1e9, 1e9, 1e9)
-        bodyPosition.P = 5000
-        bodyPosition.D = 500
-        bodyPosition.Position = root.Position
-        bodyPosition.Parent = root
-
-        bodyGyro = Instance.new("BodyGyro")
-        bodyGyro.MaxTorque = Vector3.new(1e9, 1e9, 1e9)
-        bodyGyro.P = 1e5
-        bodyGyro.CFrame = root.CFrame
-        bodyGyro.Parent = root
-    else
-        hum.PlatformStand = false
-        if bodyPosition then bodyPosition:Destroy() end
-        if bodyGyro then bodyGyro:Destroy() end
-        bodyPosition = nil
-        bodyGyro = nil
-    end
-end
-
+-- God Mode (из FoxnameHub)
 local function SetGod(state)
     god = state
     if state then
@@ -61,6 +25,42 @@ local function SetGod(state)
     end
 end
 
+-- Fly (из FoxnameHub)
+local bodyVelocity = nil
+local bodyGyro = nil
+local function SetFly(state)
+    fly = state
+    if state then
+        hum.PlatformStand = true
+        bodyVelocity = Instance.new("BodyVelocity")
+        bodyVelocity.MaxForce = Vector3.new(1e9, 1e9, 1e9)
+        bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+        bodyVelocity.Parent = root
+
+        bodyGyro = Instance.new("BodyGyro")
+        bodyGyro.MaxTorque = Vector3.new(1e9, 1e9, 1e9)
+        bodyGyro.P = 1e5
+        bodyGyro.CFrame = root.CFrame
+        bodyGyro.Parent = root
+    else
+        hum.PlatformStand = false
+        if bodyVelocity then bodyVelocity:Destroy() end
+        if bodyGyro then bodyGyro:Destroy() end
+        bodyVelocity = nil
+        bodyGyro = nil
+    end
+end
+
+local function SetNoClip(state)
+    noclip = state
+    if not char then return end
+    for _, v in pairs(char:GetDescendants()) do
+        if v:IsA("BasePart") then
+            v.CanCollide = not state
+        end
+    end
+end
+
 player.CharacterAdded:Connect(function(newChar)
     char = newChar
     hum = char:FindFirstChild("Humanoid")
@@ -71,6 +71,7 @@ player.CharacterAdded:Connect(function(newChar)
     hum.WalkSpeed = walkSpeed
 end)
 
+-- NoClip loop
 game:GetService("RunService").Heartbeat:Connect(function()
     if noclip and char then
         for _, v in pairs(char:GetDescendants()) do
@@ -81,8 +82,9 @@ game:GetService("RunService").Heartbeat:Connect(function()
     end
 end)
 
+-- Fly loop (из FoxnameHub)
 game:GetService("RunService").Heartbeat:Connect(function()
-    if fly and root and bodyPosition and bodyGyro then
+    if fly and root and bodyVelocity and bodyGyro then
         local cam = workspace.CurrentCamera
         local moveDir = Vector3.new(0, 0, 0)
         local forward = cam.CFrame.LookVector
@@ -100,11 +102,12 @@ game:GetService("RunService").Heartbeat:Connect(function()
         if moveDir.Magnitude > 0 then
             moveDir = moveDir.Unit * flySpeed
         end
-        bodyPosition.Position = root.Position + moveDir
+        bodyVelocity.Velocity = moveDir
         bodyGyro.CFrame = cam.CFrame
     end
 end)
 
+-- God Mode loop (из FoxnameHub)
 game:GetService("RunService").Heartbeat:Connect(function()
     if god and hum then
         hum.Health = hum.MaxHealth
@@ -114,6 +117,7 @@ game:GetService("RunService").Heartbeat:Connect(function()
     end
 end)
 
+-- GUI (меню)
 local gui = Instance.new("ScreenGui")
 gui.Name = "SWILL"
 gui.ResetOnSpawn = false
